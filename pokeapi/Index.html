@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f8f8;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+      h1 {
+        font-size: 3.5em;  /* ポケダイエットの文字を大きくする */
+        color: #ffcc00;
+        text-shadow: 2px 2px 2px #333;
+        text-align: center;
+      }
+      p.description {
+        font-size: 1.125em;  /* 0.75倍に設定 */
+        text-align: left;  /* 左揃えにする */
+        margin: 10px 0;  /* 行間を半分にする */
+        max-width: 600px;  /* 中央に配置 */
+        line-height: 1.5;  /* 行間設定 */
+      }
+      p.notice {
+        font-size: 0.75em; /* 0.5 * 1.5em */
+        text-align: center;
+        margin: 20px;
+      }
+      label, input, button {
+        font-size: 1.5em;
+        width: 100%;
+        max-width: 400px;
+      }
+      label {
+        margin: 10px 0 5px;  /* 上下のマージンを狭く設定 */
+      }
+      input {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 1.2em;
+        margin-bottom: 10px;
+        width: 100%;  /* 横幅を狭く設定 */
+        max-width: 300px;  /* 最大幅を設定 */
+      }
+      button {
+        padding: 10px;
+        border: none;
+        border-radius: 4px;
+        background-color: #ffcc00;
+        color: #333;
+        cursor: pointer;
+        font-size: 1.2em;
+        width: 100%;
+        max-width: 200px;
+        animation: heartbeat 1.5s infinite;  /* 心臓の鼓動のような動きを追加 */
+      }
+      button:hover {
+        background-color: #ffdd00;
+      }
+      @keyframes heartbeat {
+        0%, 100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+      }
+      .input-group {
+        background-color: #fff8dc;  /* 薄い黄色の背景を設定 */
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        margin-top: 20px; /* 1行分のスペースを追加 */
+        width: 100%; /* 横幅を広げる */
+        max-width: 500px; /* 最大幅を設定 */
+        display: flex;
+        flex-direction: column;  /* 縦型に配置 */
+        align-items: center;  /* 中央揃え */
+      }
+      #result, #result1kg, #result3kg, #result5kg {
+        margin-top: 20px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .pokemon-card-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+      }
+      .pokemon-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        margin: 10px;
+        padding: 20px;
+        text-align: center;
+        flex: 1 1 calc(33.33% - 40px);
+        max-width: 200px;
+      }
+      .pokemon-card img {
+        width: 100px;
+        height: 100px;
+      }
+      .pokemon-card p {
+        font-size: 1.2em;
+        margin: 10px 0;
+      }
+      .result-header {
+        font-size: 1.5em;
+        margin-bottom: 20px;
+        color: #555;
+        text-align: center;
+      }
+      @media (max-width: 768px) {
+        h1 {
+          font-size: 3em;
+        }
+        label, input, button {
+          font-size: 1.2em;
+          max-width: 300px;
+        }
+        .pokemon-card {
+          flex: 1 1 calc(50% - 20px);
+          max-width: 150px;
+        }
+        .pokemon-card img {
+          width: 80px;
+          height: 80px;
+        }
+        .pokemon-card p {
+          font-size: 1em;
+        }
+      }
+      @media (max-width: 375px) {
+        h1 {
+          font-size: 2.5em;
+        }
+        label, input, button {
+          font-size: 1em;
+          max-width: 250px;
+        }
+        .pokemon-card {
+          flex: 1 1 100%;
+          max-width: 100%;
+        }
+        .pokemon-card img {
+          width: 80px;
+          height: 80px;
+        }
+        .pokemon-card p {
+          font-size: 1em;
+        }
+      }
+    </style>
+    <script>
+      function searchPokemon() {
+        let userName = document.getElementById("name").value;
+        let userWeight = parseFloat(document.getElementById("weight").value);
+
+        if (isNaN(userWeight)) {
+          alert("体重を正しく入力してください");
+          return;
+        }
+
+        // Clear previous results
+        document.getElementById("result").innerHTML = '';
+        document.getElementById("result1kg").innerHTML = '';
+        document.getElementById("result3kg").innerHTML = '';
+        document.getElementById("result5kg").innerHTML = '';
+
+        google.script.run.withSuccessHandler(function(result) {
+          displayResult(result.pokemons, (userName ? userName : "あなた") + "の体重のポケモンたちはこちら", "result");
+        }).searchPokemon(userWeight, userName);
+
+        google.script.run.withSuccessHandler(function(result) {
+          displayResult(result.pokemons, "1キロ痩せるとポケモンたちはこちら", "result1kg");
+        }).searchPokemon(userWeight - 1, userName);
+
+        google.script.run.withSuccessHandler(function(result) {
+          displayResult(result.pokemons, "3キロ痩せるとポケモンたちはこちら", "result3kg");
+        }).searchPokemon(userWeight - 3, userName);
+
+        google.script.run.withSuccessHandler(function(result) {
+          displayResult(result.pokemons, "5キロ痩せるとポケモンたちはこちら", "result5kg");
+        }).searchPokemon(userWeight - 5, userName);
+      }
+
+      function displayResult(result, headerText, containerId) {
+        let resultDiv = document.getElementById(containerId);
+        if (resultDiv.innerHTML === '') {
+          resultDiv.innerHTML = `<p class="result-header">${headerText}</p>`;
+        }
+
+        let cardContainer = document.createElement('div');
+        cardContainer.className = 'pokemon-card-container';
+        resultDiv.appendChild(cardContainer);
+
+        result.forEach(pokemon => {
+          let card = document.createElement('div');
+          card.className = 'pokemon-card';
+          card.innerHTML = `
+            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png" alt="${pokemon.name}">
+            <p>${pokemon.name}</p>            
+            <p>${pokemon.weight} kg</p>
+          `;
+          cardContainer.appendChild(card);
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <h1>ポケダイエット</h1>
+    <p class="description">
+      ポケモンが好きでこれから痩せたい人向けの非公式アプリ。<br>
+      体重を入力すると、その体重に近いポケモンを調べられます。<br>
+      また、痩せた場合のポケモンも調べられます。<br>
+      理想のポケモンを目指して痩せてみませんか？<br>
+    </p>
+    <div class="input-group">
+      <label for="name">名前は...</label>
+      <input type="text" id="name">
+      <label for="weight">あなたの体重(kg)は...</label>
+      <input type="number" id="weight">
+      <button onclick="searchPokemon()">チェック</button>
+    </div>
+    <div id="result"></div>
+    <div id="result1kg"></div>
+    <div id="result3kg"></div>
+    <div id="result5kg"></div>
+    <p class="notice">※本アプリは<a href="https://pokeapi.co/" target="_blank">PokéAPI</a>を使用してデータを取得しています。画面に出力されるポケモンの情報を非営利目的で使用していて、著作権を侵害する意図は一切ありません。ポケモンは任天堂・クリーチャーズ・ゲームフリークの登録商標であり、本アプリはこれらの企業とは一切関係がありません。本アプリの利用は、ポケモンのファンや利用者が楽しむことを目的としています。</p>
+  </body>
+</html>
